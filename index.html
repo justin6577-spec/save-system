@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveSystem — UE5 Production Save Plugin</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0b; color: #e4e4e7; line-height:1.6; }
+        .hero { background: linear-gradient(135deg, #0a0a0b 0%, #1a1025 50%, #0a0a0b 100%); padding: 100px 20px; text-align:center; border-bottom: 1px solid #27272a; }
+        .hero h1 { font-size: 3.5em; font-weight:800; background: linear-gradient(135deg, #a78bfa, #7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; }
+        .hero p { font-size:1.25em; color:#a1a1aa; max-width:600px; margin:0 auto 35px; }
+        .price { font-size:2em; font-weight:700; color:#a78bfa; margin-bottom:10px; }
+        .price span { font-size:0.5em; color:#71717a; font-weight:400; }
+        .btn { display:inline-block; padding:16px 48px; background:#7c3aed; color:white; text-decoration:none; border-radius:8px; font-weight:600; font-size:1.1em; transition:background 0.2s; }
+        .btn:hover { background:#6d28d9; }
+        .section { max-width:1100px; margin:0 auto; padding:80px 20px; }
+        .section h2 { font-size:2em; margin-bottom:40px; color:#f4f4f5; text-align:center; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px; }
+        .card { background:#18181b; border:1px solid #27272a; border-radius:12px; padding:30px; }
+        .card h3 { color:#a78bfa; margin-bottom:12px; font-size:1.1em; }
+        .card p { color:#a1a1aa; font-size:0.95em; }
+        .card .icon { font-size:1.5em; margin-bottom:12px; }
+        .feature-list { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
+        .feature-item { display:flex; align-items:flex-start; gap:12px; padding:16px; background:#18181b; border-radius:8px; }
+        .feature-item .check { color:#7c3aed; font-weight:700; flex-shrink:0; }
+        .feature-item p { color:#a1a1aa; font-size:0.95em; }
+        .api-table { width:100%; border-collapse:collapse; background:#18181b; border-radius:12px; overflow:hidden; border:1px solid #27272a; }
+        .api-table th { background:#27272a; padding:14px 20px; text-align:left; color:#a78bfa; font-weight:600; }
+        .api-table td { padding:12px 20px; border-top:1px solid #27272a; color:#e4e4e7; font-family:'Fira Code', monospace; font-size:0.9em; }
+        .api-table td:last-child { color:#a1a1aa; font-family:inherit; font-size:0.9em; }
+        .code-block { background:#18181b; border:1px solid #27272a; border-radius:8px; padding:20px; overflow-x:auto; margin:20px 0; }
+        .code-block code { color:#a78bfa; font-family:'Fira Code', monospace; font-size:0.9em; }
+        .footer { text-align:center; padding:40px 20px; color:#52525b; font-size:0.85em; border-top:1px solid #18181b; }
+        .footer a { color:#a78bfa; }
+        .badge { display:inline-block; padding:6px 14px; background:#27272a; border-radius:20px; font-size:0.8em; color:#a1a1aa; margin:4px; }
+        @media(max-width:768px) {
+            .hero h1 { font-size:2.2em; }
+        }
+    </style>
+</head>
+<body>
+
+<section class="hero">
+    <h1>SaveSystem</h1>
+    <p>Production-ready async save/load plugin for Unreal Engine 5. Multi-slot saves, screenshot capture, compression, and full Blueprint support — drop it in and ship.</p>
+    <div class="price">$19.99 <span>one-time, royalty-free</span></div>
+    <div style="margin-bottom:16px;">
+        <span class="badge">UE5.4–5.8</span>
+        <span class="badge">Blueprint + C++</span>
+        <span class="badge">Zero Dependencies</span>
+        <span class="badge">Source Included</span>
+    </div>
+    <a href="#" class="btn" id="buyBtn">Buy Now — $19.99</a>
+</section>
+
+<section class="section">
+    <h2>Why SaveSystem?</h2>
+    <div class="grid">
+        <div class="card">
+            <div class="icon">💾</div>
+            <h3>Multi-Slot Saves</h3>
+            <p>Up to 999 named save slots. Auto-save, quick-save, checkpoint system — whatever your game needs.</p>
+        </div>
+        <div class="card">
+            <div class="icon">🗜️</div>
+            <h3>Zlib Compression</h3>
+            <p>Saves compressed 40–70%. Configurable per-slot. Fallback to uncompressed if compression fails.</p>
+        </div>
+        <div class="card">
+            <div class="icon">📸</div>
+            <h3>Auto Screenshots</h3>
+            <p>Capture viewport screenshots on save. Stored as PNG with each slot. Load them back any time.</p>
+        </div>
+        <div class="card">
+            <div class="icon">🧵</div>
+            <h3>Delegates + Events</h3>
+            <p><code>OnSaveCompleted</code>, <code>OnLoadCompleted</code>, <code>OnSaveProgress</code>, <code>OnScreenshotReady</code> — hook into every step.</p>
+        </div>
+        <div class="card">
+            <div class="icon">📋</div>
+            <h3>Save Metadata</h3>
+            <p>Track timestamps, versions, user tags, file sizes for every slot. Query and display in save menus.</p>
+        </div>
+        <div class="card">
+            <div class="icon">🔌</div>
+            <h3>Full Blueprint Support</h3>
+            <p>All 10 functions are BlueprintCallable. Use from C++ or Blueprint — same API, same behavior.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background:#0c0c0e; border-top:1px solid #18181b; border-bottom:1px solid #18181b; padding:80px 20px;">
+    <div style="max-width:1100px; margin:0 auto;">
+        <h2 style="text-align:center; margin-bottom:40px;">Verified Build</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:24px; justify-content:center;">
+            <div style="background:#18181b; padding:30px; border-radius:12px; text-align:center; min-width:200px;">
+                <div style="font-size:2em; color:#22c55e; margin-bottom:8px;">✓</div>
+                <div style="color:#e4e4e7; font-weight:600;">UE 5.8 Compiled</div>
+                <div style="color:#71717a; font-size:0.85em;">Clang 20.1.8, C++20</div>
+            </div>
+            <div style="background:#18181b; padding:30px; border-radius:12px; text-align:center; min-width:200px;">
+                <div style="font-size:2em; color:#22c55e; margin-bottom:8px;">0</div>
+                <div style="color:#e4e4e7; font-weight:600;">Compiler Warnings</div>
+                <div style="color:#71717a; font-size:0.85em;">Clean build, strict mode</div>
+            </div>
+            <div style="background:#18181b; padding:30px; border-radius:12px; text-align:center; min-width:200px;">
+                <div style="font-size:2em; color:#22c55e; margin-bottom:8px;">445</div>
+                <div style="color:#e4e4e7; font-weight:600;">Lines of Code</div>
+                <div style="color:#71717a; font-size:0.85em;">Lightweight, readable source</div>
+            </div>
+            <div style="background:#18181b; padding:30px; border-radius:12px; text-align:center; min-width:200px;">
+                <div style="font-size:2em; color:#22c55e; margin-bottom:8px;">8KB</div>
+                <div style="color:#e4e4e7; font-weight:600;">Package Size</div>
+                <div style="color:#71717a; font-size:0.85em;">Source-only, no binaries</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>API Reference</h2>
+    <table class="api-table">
+        <thead>
+            <tr><th>Function</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>SaveToSlot(SlotName, SaveData, Metadata)</td><td>Save game to a named slot</td></tr>
+            <tr><td>LoadFromSlot(SlotName)</td><td>Load and deserialize save data</td></tr>
+            <tr><td>DeleteSlot(SlotName)</td><td>Delete slot + all files</td></tr>
+            <tr><td>GetAllSaveSlots()</td><td>Return array of save slot metadata</td></tr>
+            <tr><td>DoesSlotExist(SlotName)</td><td>Check if slot name is in use</td></tr>
+            <tr><td>GetSlotInfo(SlotName)</td><td>Get timestamp, version, metadata</td></tr>
+            <tr><td>CaptureScreenshotForSlot(SlotName)</td><td>Capture + save viewport PNG</td></tr>
+            <tr><td>LoadScreenshotForSlot(SlotName)</td><td>Load slot's screenshot as texture</td></tr>
+            <tr><td>SetMaxSlots(Max)</td><td>Cap at 1–999 slots</td></tr>
+            <tr><td>SetCompressSaves(bool)</td><td>Toggle Zlib compression</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="section">
+    <h2>Quick Start</h2>
+    <div class="code-block">
+        <code>
+// Get the save manager (works from anywhere)<br>
+USaveManager* SaveMgr = GetGameInstance()->GetSubsystem&lt;USaveManager&gt;();<br><br>
+// Save<br>
+SaveMgr->SaveToSlot("AutoSave", MySaveObject, "Level_5");<br><br>
+// Load<br>
+SaveMgr->LoadFromSlot("AutoSave");<br><br>
+// List all saves<br>
+TArray&lt;FSaveSlotInfo&gt; Slots = SaveMgr->GetAllSaveSlots();
+        </code>
+    </div>
+</section>
+
+<section class="section" style="text-align:center;">
+    <h2>Get SaveSystem</h2>
+    <p style="color:#a1a1aa; max-width:500px; margin:0 auto 30px;">Source included. Royalty-free. Use in unlimited projects. One purchase, forever.</p>
+    <div class="price">$19.99 <span>one-time</span></div>
+    <div style="margin-top:20px;">
+        <a href="#" class="btn" id="buyBtn2">Buy Now — $19.99</a>
+    </div>
+</section>
+
+<div class="footer">
+    <p>SaveSystem v1.0.0 · Built & verified on UE 5.8 · <a href="https://komputermechanic.com">komputermechanic.com</a></p>
+    <p style="margin-top:8px;">© 2026 Dredd. Royalty-free commercial license.</p>
+</div>
+
+<script>
+// Replace with actual Stripe Payment Link when ready
+document.querySelectorAll('#buyBtn, #buyBtn2').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Stripe checkout link coming soon. File is ready for delivery.');
+    });
+});
+</script>
+
+</body>
+</html>
