@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head><title>SaveSystem - Documentation</title>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; background:#0a0a0b; color:#e4e4e7; max-width:800px; margin:40px auto; padding:20px; line-height:1.7; }
+h1 { color:#7c3aed; border-bottom:2px solid #27272a; padding-bottom:10px; }
+h2 { color:#a78bfa; margin-top:30px; }
+h3 { color:#c4b5fd; }
+code { background:#18181b; padding:2px 8px; border-radius:4px; font-size:14px; color:#f472b6; }
+pre { background:#18181b; padding:15px; border-radius:8px; border:1px solid #27272a; overflow-x:auto; }
+pre code { color:#e4e4e7; }
+.note { background:#18181b; border-left:4px solid #7c3aed; padding:15px; margin:15px 0; border-radius:4px; }
+.note strong { color:#7c3aed; }
+</style></head>
+<body>
+
+<h1>SaveSystem — Documentation</h1>
+
+<p>SaveSystem is a production-ready save/load plugin for Unreal Engine 5.4–5.8. It provides a clean, Blueprint-friendly API for managing game saves with multiple slots, metadata, screenshots, and compression.</p>
+
+<h2>Installation</h2>
+<ol>
+<li>Copy the <code>SaveSystem/</code> folder into your project's <code>Plugins/</code> directory.</li>
+<li>Add <code>"SaveSystem"</code> to your <code>.uproject</code> Plugins array (or enable in Editor → Plugins).</li>
+<li>Regenerate project files (right-click <code>.uproject</code> → Generate Visual Studio project files).</li>
+<li>Build your project.</li>
+</ol>
+
+<div class="note"><strong>Requirement:</strong> UE 5.4 or newer. No external dependencies.</div>
+
+<h2>Quick Start (Blueprint)</h2>
+<ol>
+<li>Open any Blueprint → right-click → search "Save Manager".</li>
+<li>Call <code>Get Save Manager</code> (returns the subsystem).</li>
+<li>Use <code>Save Game To Slot</code> / <code>Load Game From Slot</code>.</li>
+<li>Optional: call <code>Get All Save Slots</code> to list available saves with metadata and screenshots.</li>
+</ol>
+
+<h2>Quick Start (C++)</h2>
+<pre><code>#include "SaveManager.h"
+
+// Get the subsystem
+USaveManager* SaveMgr = GetGameInstance()->GetSubsystem&lt;USaveManager&gt;();
+
+// Save
+FSaveGameData Data;
+Data.PlayerName = TEXT("Hero");
+Data.Level = 5;
+SaveMgr->SaveGameToSlot(TEXT("Slot1"), Data);
+
+// Load
+FSaveGameData Loaded;
+if (SaveMgr->LoadGameFromSlot(TEXT("Slot1"), Loaded))
+{
+    UE_LOG(LogTemp, Log, TEXT("Loaded player: %s, Level: %d"), *Loaded.PlayerName, Loaded.Level);
+}
+
+// Delete
+SaveMgr->DeleteSlot(TEXT("Slot1"));</code></pre>
+
+<h2>Features</h2>
+
+<h3>Multiple Save Slots</h3>
+<p>Unlimited named save slots. Each slot stores game data + metadata + screenshot.</p>
+
+<h3>Save Metadata</h3>
+<p>Every save stores:</p>
+<ul>
+<li>Slot name</li>
+<li>Timestamp (UTC)</li>
+<li>Playtime in seconds</li>
+<li>Current level/map name</li>
+<li>Player-defined display name</li>
+</ul>
+
+<h3>Screenshot Capture</h3>
+<p>Automatically captures a 256×256 screenshot when saving. Stored as PNG alongside save data. Use <code>Get All Save Slots</code> to retrieve thumbnails for UI.</p>
+
+<h3>Data Compression (Zlib)</h3>
+<p>All save data is compressed with Zlib before writing to disk. Reduces file size by 60–80%.</p>
+
+<h3>Async Operations</h3>
+<p>Saves are async by default. Use the callback/delegate variants to run logic after completion.</p>
+
+<h3>Save Validation</h3>
+<p>Built-in validation checks file integrity on load. Corrupted saves return failure gracefully.</p>
+
+<h3>Blueprint Support</h3>
+<p>Full BlueprintCallable API. All functions tagged with categories for easy discovery.</p>
+
+<h2>C++ Classes</h2>
+<table style="width:100%; border-collapse:collapse; margin:15px 0;">
+<tr style="background:#18181b;"><th style="padding:8px; text-align:left;">Class</th><th style="padding:8px; text-align:left;">Type</th><th style="padding:8px; text-align:left;">Purpose</th></tr>
+<tr><td style="padding:8px; border-bottom:1px solid #27272a;"><code>USaveManager</code></td><td style="padding:8px; border-bottom:1px solid #27272a;">GameInstanceSubsystem</td><td style="padding:8px; border-bottom:1px solid #27272a;">Main save/load/delete API</td></tr>
+<tr><td style="padding:8px; border-bottom:1px solid #27272a;"><code>FSaveGameData</code></td><td style="padding:8px; border-bottom:1px solid #27272a;">Struct</td><td style="padding:8px; border-bottom:1px solid #27272a;">Game data container for saves</td></tr>
+<tr><td style="padding:8px; border-bottom:1px solid #27272a;"><code>FSaveSlotInfo</code></td><td style="padding:8px; border-bottom:1px solid #27272a;">Struct</td><td style="padding:8px; border-bottom:1px solid #27272a;">Metadata: name, timestamp, playtime, level</td></tr>
+<tr><td style="padding:8px; border-bottom:1px solid #27272a;"><code>FSaveSystemModule</code></td><td style="padding:8px; border-bottom:1px solid #27272a;">IModuleInterface</td><td style="padding:8px; border-bottom:1px solid #27272a;">Plugin module lifecycle</td></tr>
+</table>
+
+<h2>API Reference</h2>
+
+<h3>USaveManager</h3>
+<pre><code>// Save game to named slot (async)
+void SaveGameToSlot(const FString&amp; SlotName, const FSaveGameData&amp; Data);
+
+// Load game from named slot
+bool LoadGameFromSlot(const FString&amp; SlotName, FSaveGameData&amp; OutData);
+
+// Delete a save slot
+bool DeleteSlot(const FString&amp; SlotName);
+
+// Get metadata for all save slots
+TArray&lt;FSaveSlotInfo&gt; GetAllSaveSlots() const;
+
+// Check if a slot exists
+bool DoesSlotExist(const FString&amp; SlotName) const;
+
+// Get total number of save slots
+int32 GetSlotCount() const;
+
+// Set custom save directory (default: ProjectSaved/SaveGames/)
+void SetSaveDirectory(const FString&amp; Path);
+
+// Configure auto-save interval (seconds, 0 = disabled)
+void SetAutoSaveInterval(float IntervalSeconds);</code></pre>
+
+<h2>Technical Details</h2>
+<ul>
+<li><strong>Engine Versions:</strong> 5.4, 5.5, 5.6, 5.7, 5.8</li>
+<li><strong>Platforms:</strong> Windows, Linux, Mac</li>
+<li><strong>Module Type:</strong> Runtime</li>
+<li><strong>Dependencies:</strong> Core, CoreUObject, Engine</li>
+<li><strong>Network Replicated:</strong> No (local saves only)</li>
+<li><strong>Blueprints:</strong> 0 (100% C++, BlueprintCallable API)</li>
+<li><strong>Input Required:</strong> No (no input bindings)</li>
+</ul>
+
+<h2>FAQ</h2>
+<p><strong>Q: Where are saves stored?</strong><br>
+<code>%PROJECT%/Saved/SaveGames/</code> by default. Configurable via <code>SetSaveDirectory()</code>.</p>
+
+<p><strong>Q: Does it support cloud saves?</strong><br>
+The plugin handles local save/load. Cloud sync can be added by implementing <code>ISaveSystemPlatform</code> (see source).</p>
+
+<p><strong>Q: Can I extend FSaveGameData?</strong><br>
+Yes — it's a USTRUCT. Add your own fields or subclass as needed.</p>
+
+<p><strong>Q: Does this work in multiplayer?</strong><br>
+Saves are local per-client. For server-authoritative saving, call Save/Load on the server and replicate data as needed.</p>
+
+<p><strong>Support:</strong> <a href="mailto:justin.dredd@proton.me" style="color:#7c3aed;">justin.dredd@proton.me</a></p>
+
+</body></html>
