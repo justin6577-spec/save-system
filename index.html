@@ -170,11 +170,13 @@ TArray&lt;FSaveSlotInfo&gt; Slots = SaveMgr->GetAllSaveSlots();
 </div>
 
 <script>
-// Replace with actual Stripe Payment Link when ready
+// Stripe Payment Link — test mode
+const STRIPE_LINK = 'https://buy.stripe.com/test_14A4gybyi14A5vK6rp3wQ00';
+
 document.querySelectorAll('#buyBtn, #buyBtn2').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
-        alert('Stripe checkout link coming soon. File is ready for delivery.');
+        window.location.href = STRIPE_LINK;
     });
 });
 </script>
