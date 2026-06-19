@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head><title>SimpleInventory - Documentation</title>
+<style>
+body { font-family:'Segoe UI',Arial,sans-serif; background:#0a0a0b; color:#e4e4e7; max-width:800px; margin:40px auto; padding:20px; line-height:1.7; }
+h1 { color:#7c3aed; border-bottom:2px solid #27272a; padding-bottom:10px; }
+h2 { color:#a78bfa; margin-top:30px; }
+code { background:#18181b; padding:2px 8px; border-radius:4px; font-size:14px; color:#f472b6; }
+pre { background:#18181b; padding:15px; border-radius:8px; border:1px solid #27272a; overflow-x:auto; }
+.note { background:#18181b; border-left:4px solid #7c3aed; padding:15px; margin:15px 0; border-radius:4px; }
+table { width:100%; border-collapse:collapse; margin:15px 0; }
+th { background:#18181b; padding:8px; text-align:left; }
+td { padding:8px; border-bottom:1px solid #27272a; }
+</style></head>
+<body>
+<h1>SimpleInventory — Documentation</h1>
+<p>Lightweight inventory component for Unreal Engine 5.4–5.8. Add/remove items, stack management, weight tracking, and full Blueprint support.</p>
+
+<h2>Installation</h2>
+<ol><li>Copy <code>SimpleInventory/</code> into <code>Plugins/</code></li><li>Add <code>"SimpleInventory"</code> to <code>.uproject</code> Plugins array</li><li>Regenerate project files + build</li></ol>
+<div class="note"><strong>Requirement:</strong> UE 5.4+. No external dependencies.</div>
+
+<h2>Quick Start (C++)</h2>
+<pre><code>#include "InventoryComponent.h"
+UInventoryComponent* Inv = Actor->FindComponentByClass&lt;UInventoryComponent&gt;();
+Inv->AddItem(FName("Gold"), 100);
+int32 Count = Inv->GetItemCount(FName("Gold"));</code></pre>
+
+<h2>Features</h2>
+<ul><li>Add/remove items by ID with stack size limits</li><li>Item weight tracking with max capacity</li><li>HasItem/GetItemCount/GetAllItems queries</li><li>BlueprintCallable API — full Blueprint support</li><li>Single ActorComponent — add to any actor</li></ul>
+
+<h2>API</h2>
+<pre><code>bool AddItem(FName ItemID, int32 Count);
+bool RemoveItem(FName ItemID, int32 Count);
+int32 GetItemCount(FName ItemID) const;
+bool HasItem(FName ItemID, int32 Count) const;
+TArray&lt;FInventorySlot&gt; GetAllItems() const;
+float GetTotalWeight() const;
+float GetMaxWeight() const;
+void SetMaxWeight(float Weight);</code></pre>
+
+<h2>Classes</h2>
+<table>
+<tr><th>Class</th><th>Purpose</th></tr>
+<tr><td><code>UInventoryComponent</code></td><td>ActorComponent — main inventory API</td></tr>
+<tr><td><code>FInventorySlot</code></td><td>Struct — item ID, count, weight per unit</td></tr>
+</table>
+
+<h2>Technical</h2>
+<ul>
+<li><strong>Engine:</strong> 5.4–5.8</li>
+<li><strong>Platforms:</strong> Windows, Linux, Mac</li>
+<li><strong>Module:</strong> SimpleInventory (Runtime)</li>
+<li><strong>Classes:</strong> 2 (UInventoryComponent, FInventorySlot)</li>
+<li><strong>Network:</strong> No</li>
+<li><strong>Blueprints:</strong> 0 (BlueprintCallable API)</li>
+<li><strong>Deps:</strong> Core, CoreUObject, Engine</li>
+</ul>
+<p><strong>Support:</strong> justin.dredd@proton.me</p>
+</body></html>
