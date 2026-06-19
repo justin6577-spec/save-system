@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head><title>PoolingSystem - Documentation</title>
+<style>
+body { font-family:'Segoe UI',Arial,sans-serif; background:#0a0a0b; color:#e4e4e7; max-width:800px; margin:40px auto; padding:20px; line-height:1.7; }
+h1 { color:#7c3aed; border-bottom:2px solid #27272a; padding-bottom:10px; }
+h2 { color:#a78bfa; margin-top:30px; }
+code { background:#18181b; padding:2px 8px; border-radius:4px; font-size:14px; color:#f472b6; }
+pre { background:#18181b; padding:15px; border-radius:8px; border:1px solid #27272a; overflow-x:auto; }
+pre code { color:#e4e4e7; }
+.note { background:#18181b; border-left:4px solid #7c3aed; padding:15px; margin:15px 0; border-radius:4px; }
+</style></head>
+<body>
+<h1>PoolingSystem — Documentation</h1>
+<p>High-performance object and actor pooling for Unreal Engine 5.4–5.8. Reduces spawn/destroy overhead for projectiles, enemies, VFX, and any frequently-created objects.</p>
+
+<h2>Installation</h2>
+<ol><li>Copy <code>PoolingSystem/</code> into <code>Plugins/</code></li><li>Add <code>"PoolingSystem"</code> to <code>.uproject</code> Plugins array</li><li>Regenerate project files + build</li></ol>
+<div class="note"><strong>Requirement:</strong> UE 5.4+. No external dependencies.</div>
+
+<h2>Quick Start (BP)</h2>
+<ol><li>Call <code>Get Pool Subsystem</code></li><li>Call <code>Spawn Pooled Actor</code> with your actor class</li><li>Call <code>Return To Pool</code> on the actor when done</li></ol>
+
+<h2>Quick Start (C++)</h2>
+<pre><code>#include "PoolSubsystem.h"
+
+UPoolSubsystem* Pool = GetWorld()->GetSubsystem&lt;UPoolSubsystem&gt;();
+APooledProjectile* Proj = Pool->SpawnPooledActor&lt;APooledProjectile&gt;(Class);
+
+// ... use projectile ...
+
+Proj->ReturnToPool();</code></pre>
+
+<h2>Classes</h2>
+<table style="width:100%; border-collapse:collapse;">
+<tr style="background:#18181b;"><th style="padding:8px;text-align:left;">Class</th><th style="padding:8px;text-align:left;">Purpose</th></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UPoolSubsystem</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">World subsystem — main pooling API</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UPoolConfig</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Per-class pool configuration (size, warmup)</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>IPoolable</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Interface for pool-compatible actors</td></tr>
+</table>
+
+<h2>API</h2>
+<pre><code>// Spawn from pool (creates new if pool empty)
+T* SpawnPooledActor(UClass* Class, FTransform Transform);
+
+// Return actor to pool
+void ReturnToPool(AActor* Actor);
+
+// Pre-warm pool with N instances
+void WarmPool(UClass* Class, int32 Count);
+
+// Configure pool per-class
+void SetPoolConfig(UClass* Class, FPoolConfig Config);</code></pre>
+
+<h2>Technical</h2>
+<ul>
+<li><strong>Engine:</strong> 5.4–5.8</li>
+<li><strong>Platforms:</strong> Windows, Linux, Mac</li>
+<li><strong>Module:</strong> PoolingSystem (Runtime)</li>
+<li><strong>Deps:</strong> Core, CoreUObject, Engine</li>
+<li><strong>Network:</strong> No (client-side)</li>
+<li><strong>Blueprints:</strong> 0 (100% C++, BlueprintCallable)</li>
+</ul>
+<p><strong>Support:</strong> justin.dredd@proton.me</p>
+</body></html>

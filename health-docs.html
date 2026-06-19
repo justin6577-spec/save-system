@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>HealthSystem - Documentation</title>
+<style>
+body { font-family:'Segoe UI',Arial,sans-serif; background:#0a0a0b; color:#e4e4e7; max-width:800px; margin:40px auto; padding:20px; line-height:1.7; }
+h1 { color:#7c3aed; border-bottom:2px solid #27272a; padding-bottom:10px; }
+h2 { color:#a78bfa; margin-top:30px; }
+code { background:#18181b; padding:2px 8px; border-radius:4px; font-size:14px; color:#f472b6; }
+pre { background:#18181b; padding:15px; border-radius:8px; border:1px solid #27272a; overflow-x:auto; }
+pre code { color:#e4e4e7; }
+.note { background:#18181b; border-left:4px solid #7c3aed; padding:15px; margin:15px 0; border-radius:4px; }
+</style></head>
+<body>
+<h1>Health & Damage System — Documentation</h1>
+<p>Drop-in health, damage, armor, and regen system for UE 5.4–5.8. Full Blueprint support with 7 events.</p>
+
+<h2>Installation</h2>
+<ol><li>Copy <code>HealthSystem/</code> into <code>Plugins/</code></li><li>Add <code>"HealthSystem"</code> to <code>.uproject</code> Plugins array</li><li>Regenerate project files + build</li></ol>
+<div class="note"><strong>Requirement:</strong> UE 5.4+. UMG module for health bar widget.</div>
+
+<h2>Quick Start (BP)</h2>
+<ol><li>Add <code>HealthComponent</code> to any actor</li><li>Call <code>Apply Damage</code> to deal damage</li><li>Use events: <code>OnDamaged</code>, <code>OnDeath</code>, <code>OnHealed</code></li></ol>
+
+<h2>Quick Start (C++)</h2>
+<pre><code>#include "HealthComponent.h"
+
+UHealthComponent* Health = Actor->FindComponentByClass&lt;UHealthComponent&gt;();
+Health->ApplyDamage(25.0f, EDamageType::Fire);</code></pre>
+
+<h2>Damage Types</h2>
+<ul><li>Physical, Fire, Ice, Poison, Magic</li><li>Armor can have per-type resistance values</li></ul>
+
+<h2>Classes</h2>
+<table style="width:100%; border-collapse:collapse;">
+<tr style="background:#18181b;"><th style="padding:8px;text-align:left;">Class</th><th style="padding:8px;text-align:left;">Purpose</th></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UHealthComponent</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Actor component — health, damage, death</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UArmorComponent</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Damage reduction per type</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UHealthRegenComponent</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Auto-health regeneration</td></tr>
+</table>
+
+<h2>Events (BlueprintAssignable)</h2>
+<ul><li>OnDamaged, OnDeath, OnHealed, OnArmorChanged, OnMaxHealthChanged, OnRevived, OnDamageTypeChanged</li></ul>
+
+<h2>API</h2>
+<pre><code>void ApplyDamage(float Amount, EDamageType Type);
+void Heal(float Amount);
+void Revive(float HealthPercent);
+float GetHealth() const;
+float GetHealthPercent() const;
+bool IsDead() const;</code></pre>
+
+<h2>Technical</h2>
+<ul>
+<li><strong>Engine:</strong> 5.4–5.8</li>
+<li><strong>Platforms:</strong> Windows, Linux, Mac</li>
+<li><strong>Module:</strong> HealthSystem (Runtime)</li>
+<li><strong>Deps:</strong> Core, CoreUObject, Engine, UMG</li>
+<li><strong>Network:</strong> Yes (replicated via RPC)</li>
+<li><strong>Blueprints:</strong> 0 (BlueprintCallable API)</li>
+</ul>
+<p><strong>Support:</strong> justin.dredd@proton.me</p>
+</body></html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head><title>InteractionSystem - Documentation</title>
+<style>
+body { font-family:'Segoe UI',Arial,sans-serif; background:#0a0a0b; color:#e4e4e7; max-width:800px; margin:40px auto; padding:20px; line-height:1.7; }
+h1 { color:#7c3aed; border-bottom:2px solid #27272a; padding-bottom:10px; }
+h2 { color:#a78bfa; margin-top:30px; }
+code { background:#18181b; padding:2px 8px; border-radius:4px; font-size:14px; color:#f472b6; }
+pre { background:#18181b; padding:15px; border-radius:8px; border:1px solid #27272a; overflow-x:auto; }
+pre code { color:#e4e4e7; }
+.note { background:#18181b; border-left:4px solid #7c3aed; padding:15px; margin:15px 0; border-radius:4px; }
+</style></head>
+<body>
+<h1>Interaction System — Documentation</h1>
+<p>Raycast-based object interaction for UE 5.4–5.8. Outline highlights, prompts, hold-to-interact. Works with any actor.</p>
+
+<h2>Installation</h2>
+<ol><li>Copy <code>InteractionSystem/</code> into <code>Plugins/</code></li><li>Add <code>"InteractionSystem"</code> to <code>.uproject</code> Plugins array</li><li>Regenerate project files + build</li></ol>
+<div class="note"><strong>Requirement:</strong> UE 5.4+. UMG for interaction widget.</div>
+
+<h2>Quick Start (BP)</h2>
+<ol><li>Add <code>InteractionComponent</code> to your player character</li><li>Add <code>Interactable</code> interface to any actor (doors, items, NPCs)</li><li>System auto-detects, highlights, and shows prompts</li></ol>
+
+<h2>Quick Start (C++)</h2>
+<pre><code>#include "InteractionComponent.h"
+
+UInteractionComponent* Interact = Player->FindComponentByClass&lt;UInteractionComponent&gt;();
+// System auto-runs — just add IInteractable to target actors</code></pre>
+
+<h2>How It Works</h2>
+<ol><li><strong>Detect:</strong> Line trace + overlap from camera every frame</li><li><strong>Highlight:</strong> Custom depth outline on focused actor</li><li><strong>Prompt:</strong> Interaction widget shows action text + key hint</li><li><strong>Execute:</strong> Hold-to-interact (configurable duration) or instant</li></ol>
+
+<h2>Classes</h2>
+<table style="width:100%; border-collapse:collapse;">
+<tr style="background:#18181b;"><th style="padding:8px;text-align:left;">Class</th><th style="padding:8px;text-align:left;">Purpose</th></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UInteractionComponent</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Player component — trace, highlight, execute</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>IInteractable</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">Interface for interactable actors</td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #27272a;"><code>UInteractionWidget</code></td><td style="padding:8px;border-bottom:1px solid #27272a;">UMG widget — prompt display</td></tr>
+</table>
+
+<h2>IInteractable Interface</h2>
+<pre><code>FString GetInteractionPrompt() const;  // "Press E to open door"
+float GetInteractionDuration() const;  // 0 = instant
+void OnInteract(AActor* Interactor);
+void OnFocusBegin();
+void OnFocusEnd();</code></pre>
+
+<h2>Technical</h2>
+<ul>
+<li><strong>Engine:</strong> 5.4–5.8</li>
+<li><strong>Platforms:</strong> Windows, Linux, Mac</li>
+<li><strong>Module:</strong> InteractionSystem (Runtime)</li>
+<li><strong>Deps:</strong> Core, CoreUObject, Engine, UMG</li>
+<li><strong>Network:</strong> No (client-side interaction)</li>
+<li><strong>Blueprints:</strong> 0 (BlueprintCallable API)</li>
+</ul>
+<p><strong>Support:</strong> justin.dredd@proton.me</p>
+</body></html>
