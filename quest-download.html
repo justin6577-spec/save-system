@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>QuestSystem Download</title>
+<style>
+body { font-family:Arial,sans-serif; background:#0a0a0b; color:#e4e4e7; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+.box { background:#18181b; padding:40px; border-radius:12px; border:1px solid #27272a; text-align:center; }
+input { padding:10px; margin:10px; background:#27272a; border:1px solid#3f3f46; color:#e4e4e7; border-radius:6px; font-size:16px; }
+button { padding:10px 30px; background:#7c3aed; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
+.error { color:#ef4444; margin-top:10px; }
+</style></head>
+<body>
+<div class="box">
+<h2>QuestSystem v1.0.0</h2>
+<p>Enter password to download</p>
+<input type="password" id="pw" placeholder="Password"><br>
+<button onclick="check()">Download</button>
+<p class="error" id="err"></p>
+</div>
+<script>
+function check() {
+  if(document.getElementById('pw').value === 'fab-review-2026') {
+    window.location.href = 'QuestSystem_v1.0.0.zip';
+  } else {
+    document.getElementById('err').textContent = 'Wrong password';
+  }
+}
+</script>
+</body></html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head><title>DialogueSystem - Documentation</title>
+<style>
+body { font-family:'Segoe UI',Arial,sans-serif; background:#0a0a0b; color:#e4e4e7; max-width:800px; margin:40px auto; padding:20px; line-height:1.7; }
+h1 { color:#7c3aed; border-bottom:2px solid #27272a; padding-bottom:10px; }
+h2 { color:#a78bfa; margin-top:30px; }
+code { background:#18181b; padding:2px 8px; border-radius:4px; font-size:14px; color:#f472b6; }
+pre { background:#18181b; padding:15px; border-radius:8px; border:1px solid #27272a; overflow-x:auto; }
+pre code { color:#e4e4e7; }
+.note { background:#18181b; border-left:4px solid #7c3aed; padding:15px; margin:15px 0; border-radius:4px; }
+</style></head>
+<body>
+<h1>DialogueSystem — Documentation</h1>
+<p>Branching dialogue trees with conditions, player responses, and events. Data-driven — define dialogues in DataTables, run them with a single ActorComponent.</p>
+
+<h2>Installation</h2>
+<ol><li>Copy <code>DialogueSystem/</code> into <code>Plugins/</code></li><li>Add <code>"DialogueSystem"</code> to <code>.uproject</code> Plugins array</li><li>Regenerate project files + build</li></ol>
+<div class="note"><strong>Requirement:</strong> UE 5.4+. ActorComponent — add to any actor.</div>
+
+<h2>Quick Start (BP)</h2>
+<p>Open any Blueprint, search for the subsystem/component, and call the main API functions. All functions are BlueprintCallable.</p>
+
+<h2>Quick Start (C++)</h2>
+<pre><code>#include "DialogueSystem.h"
+// Get the subsystem/component and call Start/Initialize functions</code></pre>
+
+<h2>Features</h2>
+<ul><li>DataTable-driven dialogue trees</li><li>branching player responses</li><li>condition-gated response visibility</li><li>auto-advance nodes</li><li>dialogue events</li><li>condition system (SetCondition/GetCondition)</li><li>3 Blueprint events</li><li>single ActorComponent — add to any actor</li></ul>
+
+<h2>API</h2>
+<p>Full BlueprintCallable API. All public functions exposed to Blueprints.</p>
+
+<h2>Technical</h2>
+<ul>
+<li><strong>Engine:</strong> 5.4–5.8</li>
+<li><strong>Platforms:</strong> Windows, Linux, Mac</li>
+<li><strong>Module:</strong> DialogueSystem (Runtime)</li>
+<li><strong>Classes:</strong> 5 (UDialogueComponent, FDialogueNode, FDialogueResponse, FDialogueCondition, FDialogueSnapshot)</li>
+<li><strong>Network:</strong> No</li>
+<li><strong>Blueprints:</strong> 0 (BlueprintCallable API)</li>
+</ul>
+<p><strong>Support:</strong> justin.dredd@proton.me</p>
+</body></html>
