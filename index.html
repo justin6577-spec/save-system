@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a1a">
+<title>Norrath Chronicles</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#0a0a1a;color:#d4c49a;touch-action:manipulation;overflow:hidden;height:100dvh}
+#game{max-width:480px;margin:0 auto;height:100dvh;display:flex;flex-direction:column}
+.screen{display:none;flex:1;overflow-y:auto;padding:16px}
+.screen.active{display:block}
+h1{font-size:1.4em;text-align:center;color:#f0d870;text-shadow:0 0 10px #f0d87040;padding:12px 0}
+h2{font-size:1.1em;color:#f0d870;margin:12px 0 8px}
+.btn{display:block;width:100%;padding:14px;margin:6px 0;background:linear-gradient(180deg,#2a1a3a,#1a0a2a);border:1px solid #4a3a5a;border-radius:8px;color:#d4c49a;font-size:1em;text-align:left;cursor:pointer;transition:all .15s}
+.btn:active{background:#3a2a4a;transform:scale(.98)}
+.btn.gold{background:linear-gradient(180deg,#5a4a1a,#3a2a0a);border-color:#8a7a4a}
+.btn.danger{background:linear-gradient(180deg,#4a1a1a,#2a0a0a);border-color:#6a3a3a;color:#ff6a6a}
+.btn:disabled{opacity:.4}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.9em}
+.stat-row .val{color:#f0d870}
+#enemyBar{background:#1a0a0a;border:1px solid #3a1a1a;border-radius:8px;padding:12px;margin:8px 0;text-align:center}
+#enemyBar h3{color:#ff6a4a;font-size:1.1em}
+.hp-bar{background:#1a0a0a;border:1px solid #3a1a1a;border-radius:4px;height:20px;margin:8px 0;overflow:hidden}
+.hp-fill{background:linear-gradient(90deg,#ff3a2a,#ff6a3a);height:100%;transition:width .2s}
+#tapZone{background:linear-gradient(180deg,#1a2a1a,#0a1a0a);border:2px dashed #3a5a3a;border-radius:16px;padding:40px 20px;margin:12px 0;text-align:center;cursor:pointer;user-select:none;min-height:120px;display:flex;align-items:center;justify-content:center}
+#tapZone:active{background:#2a3a2a}
+#tapZone .sword{font-size:3em;transition:transform .1s}
+#tapZone:active .sword{transform:rotate(-15deg) scale(1.1)}
+.log{font-size:.8em;color:#6a6a8a;max-height:120px;overflow-y:auto;margin:8px 0}
+.log .dmg{color:#ff6a4a}
+.log .heal{color:#4aff4a}
+.log .xp{color:#f0d870}
+.log .lvl{color:#f0d870;font-weight:bold}
+.float{position:fixed;pointer-events:none;font-weight:bold;animation:floatUp .8s forwards;z-index:100}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75em;margin:2px}
+.badge.good{background:#1a3a1a;color:#4aff4a;border:1px solid #2a5a2a}
+.badge.evil{background:#3a1a1a;color:#ff4a4a;border:1px solid #5a2a2a}
+.badge.neutral{background:#2a2a1a;color:#f0d870;border:1px solid #5a5a2a}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid2 .btn{font-size:.85em;padding:10px;text-align:center}
+#zoneSelect .btn{min-height:60px}
+#zoneSelect .btn small{display:block;font-size:.75em;color:#8a8aaa}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="createScreen" class="screen active">
+    <h1>⚔️ Norrath Chronicles</h1>
+    <p style="text-align:center;color:#8a8aaa;margin-bottom:16px">Choose your destiny</p>
+    <h2>Pick Your Race</h2>
+    <div id="raceList" class="grid2"></div>
+    <h2 style="display:none" id="classLabel">Pick Your Class</h2>
+    <div id="classList" class="grid2" style="display:none"></div>
+    <button class="btn gold" id="startBtn" style="display:none;text-align:center;font-size:1.2em">⚔️ Enter Norrath</button>
+  </div>
+
+  <div id="gameScreen" class="screen">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><strong id="charName">Adventurer</strong></div>
+      <div>Lv.<span id="charLevel">1</span></div>
+    </div>
+    <div class="hp-bar"><div class="hp-fill" id="playerHpBar" style="width:100%"></div></div>
+    <div class="stat-row"><span>❤️ <span id="playerHp">100</span>/<span id="playerMaxHp">100</span></span><span id="playerZone">Qeynos Hills</span></div>
+
+    <div id="enemyBar">
+      <h3 id="enemyName">Rat</h3>
+      <div class="stat-row"><span>Level <span id="enemyLevel">1</span></span></div>
+      <div class="hp-bar"><div class="hp-fill" id="enemyHpBar" style="width:100%"></div></div>
+      <div class="stat-row"><span>❤️ <span id="enemyHp">10</span>/<span id="enemyMaxHp">10</span></span><span>⚔️ <span id="enemyDmg">4</span></span></div>
+    </div>
+
+    <div id="tapZone">
+      <div>
+        <div class="sword">⚔️</div>
+        <div style="color:#8a8aaa;font-size:.9em;margin-top:8px">TAP TO ATTACK</div>
+      </div>
+    </div>
+
+    <div class="stat-row"><span>XP: <span id="xpBar"></span></span><span><span id="xpCurrent">0</span>/<span id="xpNeeded">100</span></span></div>
+    <div class="hp-bar"><div class="hp-fill" id="xpFill" style="width:0%;background:linear-gradient(90deg,#f0d870,#ffd040)"></div></div>
+
+    <button class="btn" id="zoneSelectBtn">🗺️ Change Zone</button>
+  </div>
+
+  <div id="zoneScreen" class="screen">
+    <h1>🗺️ Travel</h1>
+    <div id="zoneList"></div>
+    <button class="btn danger" onclick="switchScreen('gameScreen')">◀ Back</button>
+  </div>
+
+  <div id="deathScreen" class="screen">
+    <h1 style="color:#ff4a4a">💀 Defeated</h1>
+    <p style="text-align:center;margin:16px">Your spirit returns to bind point...</p>
+    <button class="btn gold" onclick="respawn()" style="text-align:center">Respawn</button>
+  </div>
+</div>
+
+<script>
+// === GAME ENGINE ===
+const GAMEDB = {"races": {"Barbarian": {"name": "Barbarian"}, "Dark_Elf": {"name": "Dark Elf"}, "Dwarf": {"name": "Dwarf"}, "Erudite": {"name": "Erudite"}, "Gnome": {"name": "Gnome"}, "Half-Elf": {"name": "Half-Elf"}, "Halfling": {"name": "Halfling"}, "High_Elf": {"name": "High Elf"}, "Human": {"name": "Human"}, "Iksar": {"name": "Iksar"}, "Ogre": {"name": "Ogre"}, "Troll": {"name": "Troll"}, "Wood_Elf": {"name": "Wood Elf"}}, "classes": {"Bard": {"name": "Bard"}, "Cleric": {"name": "Cleric"}, "Druid": {"name": "Druid"}, "Enchanter": {"name": "Enchanter"}, "Magician": {"name": "Magician"}, "Monk": {"name": "Monk"}, "Necromancer": {"name": "Necromancer"}, "Paladin": {"name": "Paladin"}, "Ranger": {"name": "Ranger"}, "Rogue": {"name": "Rogue"}, "Shadow_Knight": {"name": "Shadow"}, "Shaman": {"name": "Shaman"}, "Warrior": {"name": "Warrior"}, "Wizard": {"name": "Wizard"}}, "zones": {"1-5": {"name": "Starting Areas", "zones": ["Qeynos Hills", "Everfrost Peaks", "Misty Thicket", "Greater Faydark", "Innothule Swamp", "Field of Bone", "Steamfont Mountains", "Butcherblock Mountains", "Nektulos Forest", "Toxxulia Forest"], "enemies": ["Rat", "Skeleton", "Bat", "Orc Pawn", "Spiderling", "Kobold Pup", "Decaying Skeleton"]}, "5-10": {"name": "Outskirts", "zones": ["Blackburrow", "Crushbone", "Befallen", "The Warrens", "Qeynos Aqueducts", "Nektulos Forest"], "enemies": ["Gnoll", "Orc Centurion", "Skeleton", "Goblin Scout", "Kobold", "Giant Bat"]}, "10-15": {"name": "Frontier Zones", "zones": ["Upper Guk", "Estate of Unrest", "Northern Desert of Ro", "Southern Desert of Ro", "Lake Rathetear", "Erud's Crossing"], "enemies": ["Froglok", "Zombie", "Mummy", "Orc Oracle", "Aviak", "Goblin Warrior"]}, "15-20": {"name": "Wilderness", "zones": ["Oasis of Marr", "Highpass Hold", "Permafrost", "Gorge of King Xorbb", "Lavastorm Mountains", "Timorous Deep"], "enemies": ["Crocodile", "Orc Legionnaire", "Goblin Shaman", "Will-O-Wisp", "Fire Elemental", "Giant Spider"]}, "20-25": {"name": "Deep Frontier", "zones": ["Najena", "Ocean of Tears", "South Karana", "Lake of Ill Omen", "Warsliks Woods", "Mistmoore"], "enemies": ["Efreeti", "Spectre", "Aviak Avocet", "Goblin Warlord", "Forest Giant", "Vampire"]}, "25-30": {"name": "Dungeon Depths", "zones": ["Cazic Thule", "Lower Guk", "Solusek's Eye", "Tower of Frozen Shadow", "Kaesora", "Frontier Mountains"], "enemies": ["Alligator", "Froglok Knight", "Goblin King", "Shadow Beast", "Spectral Warrior", "Giant Skeleton"]}, "30-35": {"name": "High Adventure", "zones": ["Mistmoore Castle", "City of Mist", "Emerald Jungle", "Dreadlands", "Crystal Caverns", "Trakanon's Teeth"], "enemies": ["Vampire Lord", "Ghost", "Gorilla", "Drolvarg", "Geonid", "Wyvern"]}, "35-40": {"name": "Dangerous Lands", "zones": ["Karnor's Castle", "Old Sebilis", "Howling Stones", "Burning Woods", "The Hole", "Kedge Keep"], "enemies": ["Drolvarg Warlord", "Froglok Wizard", "Spectral Lord", "Dragon Whelp", "Golem", "Mermaid"]}, "40-45": {"name": "Epic Grounds", "zones": ["Plane of Fear", "Plane of Hate", "Western Wastes", "Temple of Veeshan", "Siren's Grotto", "Dragon Necropolis"], "enemies": ["Nightmare", "Innoruuk's Minion", "Frost Giant", "Dragon", "Siren", "Skeleton Dragon"]}, "45-50": {"name": "The Planes", "zones": ["Plane of Sky", "Plane of Growth", "Plane of Mischief", "Veeshan's Peak", "Sleeper's Tomb", "Kael Drakkel"], "enemies": ["Djinn", "Treant", "Trickster Spirit", "Elder Dragon", "Ancient Wyrm", "Frost Giant King"]}}, "class_race_map": {"Warrior": ["Human", "Barbarian", "Dark_Elf", "Dwarf", "Gnome", "Half-Elf", "Halfling", "Iksar", "Ogre", "Troll", "Wood_Elf"], "Cleric": ["Human", "Dark_Elf", "Dwarf", "Erudite", "Gnome", "Halfling", "High_Elf"], "Paladin": ["Human", "Dwarf", "Erudite", "Half-Elf", "High_Elf"], "Ranger": ["Human", "Half-Elf", "Halfling", "Wood_Elf"], "Shadow_Knight": ["Human", "Dark_Elf", "Erudite", "Iksar", "Ogre", "Troll"], "Druid": ["Human", "Half-Elf", "Halfling", "Wood_Elf"], "Monk": ["Human", "Iksar"], "Bard": ["Human", "Half-Elf", "Wood_Elf"], "Rogue": ["Human", "Barbarian", "Dark_Elf", "Dwarf", "Gnome", "Half-Elf", "Halfling", "Wood_Elf"], "Shaman": ["Barbarian", "Iksar", "Ogre", "Troll"], "Necromancer": ["Human", "Dark_Elf", "Erudite", "Gnome", "Iksar"], "Wizard": ["Human", "Dark_Elf", "Erudite", "Gnome", "High_Elf"], "Magician": ["Human", "Dark_Elf", "Erudite", "Gnome", "High_Elf"], "Enchanter": ["Human", "Dark_Elf", "Erudite", "Gnome", "High_Elf"]}, "class_stats": {"Warrior": {"str": 20, "sta": 20, "agi": 15, "dex": 15, "wis": 10, "int": 5, "hp_per_lvl": 12}, "Paladin": {"str": 18, "sta": 18, "agi": 12, "dex": 12, "wis": 18, "int": 10, "hp_per_lvl": 10}, "Shadow_Knight": {"str": 18, "sta": 18, "agi": 12, "dex": 12, "wis": 10, "int": 18, "hp_per_lvl": 10}, "Ranger": {"str": 15, "sta": 15, "agi": 18, "dex": 18, "wis": 15, "int": 10, "hp_per_lvl": 9}, "Monk": {"str": 18, "sta": 15, "agi": 18, "dex": 18, "wis": 15, "int": 10, "hp_per_lvl": 9}, "Rogue": {"str": 15, "sta": 15, "agi": 20, "dex": 20, "wis": 10, "int": 10, "hp_per_lvl": 8}, "Bard": {"str": 14, "sta": 14, "agi": 16, "dex": 16, "wis": 14, "int": 14, "hp_per_lvl": 7}, "Shaman": {"str": 14, "sta": 16, "agi": 12, "dex": 12, "wis": 20, "int": 10, "hp_per_lvl": 7}, "Cleric": {"str": 14, "sta": 14, "agi": 12, "dex": 12, "wis": 20, "int": 10, "hp_per_lvl": 7}, "Druid": {"str": 12, "sta": 14, "agi": 14, "dex": 14, "wis": 20, "int": 10, "hp_per_lvl": 7}, "Necromancer": {"str": 10, "sta": 12, "agi": 14, "dex": 14, "wis": 10, "int": 20, "hp_per_lvl": 5}, "Wizard": {"str": 10, "sta": 12, "agi": 14, "dex": 14, "wis": 10, "int": 20, "hp_per_lvl": 5}, "Magician": {"str": 10, "sta": 12, "agi": 14, "dex": 14, "wis": 10, "int": 20, "hp_per_lvl": 5}, "Enchanter": {"str": 10, "sta": 12, "agi": 14, "dex": 14, "wis": 10, "int": 20, "hp_per_lvl": 5}}};
+const XP_TABLE = (()=>{let t={},a=0;for(let l=1;l<=60;l++){a+=Math.floor(l*25+Math.pow(l,2)*2);t[l]=a}return t})();
+
+let STATE = {
+  screen:'create',
+  selectedRace:null, selectedClass:null,
+  player:{name:'',race:'',cls:'',level:1,xp:0,hp:100,maxHp:100,atk:5,def:2,str:10,sta:10,dex:10,agi:10,zone:'1-5',kills:0,gold:0},
+  enemy:{name:'Rat',level:1,hp:10,maxHp:10,atk:4,def:1},
+  log:[]
+};
+
+// === UI ===
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id+'Screen').classList.add('active');
+  STATE.screen = id;
+  if(id==='game') updateEnemyDisplay();
+  if(id==='zone') renderZones();
+}
+
+// === CREATE ===
+function renderRaces() {
+  const races = Object.entries(GAMEDB.races);
+  document.getElementById('raceList').innerHTML = races.map(([k,v])=>`<button class="btn" onclick="selectRace('${k}')">${v.name}</button>`).join('');
+}
+
+function selectRace(raceKey) {
+  STATE.selectedRace = raceKey;
+  STATE.selectedClass = null;
+  document.querySelectorAll('#raceList .btn').forEach(b=>b.style.borderColor=b.textContent===GAMEDB.races[raceKey].name?'#f0d870':'');
+  
+  const availableClasses = GAMEDB.class_race_map || {};
+  const classBtns = Object.entries(GAMEDB.classes)
+    .filter(([k])=>Object.values(availableClasses).some(races=>races.includes(raceKey)) && Object.entries(availableClasses).find(([ck,cr])=>ck===k) && cr.includes(raceKey))
+    .map(([k,v])=>`<button class="btn" onclick="selectClass('${k}')">${v.name.split(' ')[0]||v.name}</button>`).join('');
+  
+  document.getElementById('classList').innerHTML = classBtns || '<p style="color:#8a8aaa">No classes available</p>';
+  document.getElementById('classList').style.display = 'block';
+  document.getElementById('classLabel').style.display = 'block';
+  document.getElementById('startBtn').style.display = 'none';
+}
+
+function selectClass(clsKey) {
+  STATE.selectedClass = clsKey;
+  document.querySelectorAll('#classList .btn').forEach(b=>b.style.borderColor=b.textContent===GAMEDB.classes[clsKey].name.split(' ')[0]?'#f0d870':'');
+  document.getElementById('startBtn').style.display = 'block';
+}
+
+function startGame() {
+  if(!STATE.selectedRace||!STATE.selectedClass) return;
+  const stats = GAMEDB.class_stats[STATE.selectedClass] || {str:10,sta:10,agi:10,dex:10,wis:10,int:10,hp_per_lvl:8};
+  STATE.player = {
+    name:GAMEDB.races[STATE.selectedRace].name+' '+GAMEDB.classes[STATE.selectedClass].name.split(' ')[0],
+    race:STATE.selectedRace, cls:STATE.selectedClass, level:1, xp:0,
+    hp:100+stats.sta*5, maxHp:100+stats.sta*5,
+    atk:5+Math.floor(stats.str/2), def:2+Math.floor(stats.agi/3),
+    str:stats.str, sta:stats.sta, dex:stats.dex, agi:stats.agi, wis:stats.wis, int:stats.int,
+    hp_per_lvl:stats.hp_per_lvl||8, zone:'1-5', kills:0, gold:0
+  };
+  document.getElementById('charName').textContent = STATE.player.name;
+  updatePlayerDisplay();
+  spawnEnemy();
+  switchScreen('game');
+}
+
+// === COMBAT ===
+function spawnEnemy() {
+  const zone = GAMEDB.zones[STATE.player.zone];
+  const enemies = zone.enemies;
+  const name = enemies[Math.floor(Math.random()*enemies.length)];
+  const lvl = STATE.player.level + Math.floor(Math.random()*3)-1;
+  const level = Math.max(1, Math.min(60,lvl));
+  const hp = 10+level*8+Math.floor(Math.random()*20);
+  const atk = 3+Math.floor(level*1.5);
+  STATE.enemy = {name, level, hp, maxHp:hp, atk, def:Math.floor(level/3)};
+  updateEnemyDisplay();
+  document.getElementById('playerZone').textContent = zone.name+' — '+zone.zones[Math.floor(Math.random()*zone.zones.length)];
+}
+
+function attack() {
+  if(STATE.enemy.hp<=0){spawnEnemy();return}
+  
+  const p = STATE.player;
+  const e = STATE.enemy;
+  const crit = Math.random()<0.1;
+  const dmg = Math.max(1,Math.floor(p.atk*(0.8+Math.random()*0.4)-e.def)+Math.floor(Math.random()*5));
+  const finalDmg = crit?dmg*2:dmg;
+  
+  e.hp -= finalDmg;
+  floatText(crit?'💥'+finalDmg:''+finalDmg, crit?'#ff0':'#ff6a4a');
+  addLog(`You hit ${e.name} for ${finalDmg}${crit?' CRIT!':''}`, 'dmg');
+  
+  updateEnemyDisplay();
+  
+  if(e.hp<=0){
+    killEnemy();
+    return;
+  }
+  
+  // Enemy attacks back
+  setTimeout(()=>{
+    if(STATE.screen!=='game')return;
+    const edmg = Math.max(1,Math.floor(e.atk*(0.8+Math.random()*0.4)-p.def));
+    p.hp -= edmg;
+    floatText(''+edmg, '#ff4a4a');
+    addLog(`${e.name} hits you for ${edmg}`, 'dmg');
+    updatePlayerDisplay();
+    
+    if(p.hp<=0) death();
+  }, 300);
+}
+
+function killEnemy() {
+  const p = STATE.player;
+  const xpGain = Math.floor(STATE.enemy.level*10+Math.random()*20);
+  p.xp += xpGain;
+  p.kills++;
+  p.gold += Math.floor(Math.random()*5)+1;
+  addLog(`Slain ${STATE.enemy.name}! +${xpGain} XP`, 'xp');
+  
+  // Level up check
+  const needed = XP_TABLE[p.level]||1000;
+  if(p.xp >= needed && p.level < 60) {
+    p.level++;
+    p.xp -= needed;
+    p.maxHp += p.hp_per_lvl||8;
+    p.hp = p.maxHp;
+    p.atk += Math.floor(Math.random()*3)+1;
+    p.def += Math.floor(Math.random()*2);
+    addLog(`⭐ LEVEL UP! You are now level ${p.level}!`, 'lvl');
+    
+    // Check zone unlock
+    const zoneTiers = Object.keys(GAMEDB.zones);
+    for(let i=zoneTiers.length-1;i>=0;i--){
+      const [min] = zoneTiers[i].split('-').map(Number);
+      if(p.level>=min) {
+        if(GAMEDB.zones[zoneTiers[i]] && zoneTiers[i]!==p.zone) {
+          addLog(`🗺️ New zones unlocked!`, 'lvl');
+        }
+        break;
+      }
+    }
+  }
+  
+  updatePlayerDisplay();
+  setTimeout(spawnEnemy, 800);
+}
+
+function death() {
+  STATE.player.hp = Math.floor(STATE.player.maxHp/2);
+  STATE.player.xp = Math.max(0, STATE.player.xp - Math.floor(XP_TABLE[STATE.player.level]*0.1));
+  switchScreen('death');
+}
+
+function respawn() {
+  STATE.player.hp = STATE.player.maxHp;
+  updatePlayerDisplay();
+  spawnEnemy();
+  switchScreen('game');
+}
+
+// === DISPLAY ===
+function updatePlayerDisplay() {
+  const p = STATE.player;
+  document.getElementById('playerHp').textContent = Math.max(0,p.hp);
+  document.getElementById('playerMaxHp').textContent = p.maxHp;
+  document.getElementById('playerHpBar').style.width = Math.max(0,(p.hp/p.maxHp)*100)+'%';
+  document.getElementById('charLevel').textContent = p.level;
+  
+  const needed = XP_TABLE[p.level]||1000;
+  document.getElementById('xpCurrent').textContent = p.xp;
+  document.getElementById('xpNeeded').textContent = needed;
+  document.getElementById('xpBar').textContent = Math.floor((p.xp/needed)*100)+'%';
+  document.getElementById('xpFill').style.width = Math.floor((p.xp/needed)*100)+'%';
+}
+
+function updateEnemyDisplay() {
+  const e = STATE.enemy;
+  document.getElementById('enemyName').textContent = e.name;
+  document.getElementById('enemyLevel').textContent = e.level;
+  document.getElementById('enemyHp').textContent = Math.max(0,e.hp);
+  document.getElementById('enemyMaxHp').textContent = e.maxHp;
+  document.getElementById('enemyDmg').textContent = e.atk;
+  document.getElementById('enemyHpBar').style.width = Math.max(0,(e.hp/e.maxHp)*100)+'%';
+}
+
+function addLog(msg, cls) {
+  STATE.log.unshift({msg,cls});
+  if(STATE.log.length>20) STATE.log.pop();
+  document.getElementById('tapZone').querySelector('.log')||(function(){
+    const div = document.createElement('div');
+    div.className='log';
+    document.getElementById('tapZone').appendChild(div);
+  })();
+  const logDiv = document.getElementById('tapZone').querySelector('.log');
+  logDiv.innerHTML = STATE.log.slice(0,5).map(l=>`<span class="${l.cls}">${l.msg}</span>`).join('<br>');
+}
+
+function floatText(text, color) {
+  const el = document.createElement('div');
+  el.className='float';
+  el.style.color=color;
+  el.style.left=(30+Math.random()*30)+'%';
+  el.style.top='50%';
+  el.textContent=text;
+  document.getElementById('gameScreen').appendChild(el);
+  setTimeout(()=>el.remove(),800);
+}
+
+// === ZONES ===
+function renderZones() {
+  const p = STATE.player;
+  let html = '';
+  for(const [range,data] of Object.entries(GAMEDB.zones)) {
+    const [min] = range.split('-').map(Number);
+    const locked = p.level < min;
+    html += `<button class="btn" onclick="changeZone('${range}')" ${locked?'disabled':''}>
+      ${locked?'🔒 ':''}Lv ${range} — ${data.name} ${range===p.zone?'◀':''}
+      ${locked?'':`<small>${data.zones.slice(0,2).join(', ')}...</small>`}
+    </button>`;
+  }
+  document.getElementById('zoneList').innerHTML = html;
+}
+
+function changeZone(range) {
+  STATE.player.zone = range;
+  spawnEnemy();
+  switchScreen('game');
+}
+
+// === INIT ===
+document.getElementById('tapZone').addEventListener('click', attack);
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('zoneSelectBtn').addEventListener('click', ()=>switchScreen('zone'));
+
+renderRaces();
+updatePlayerDisplay();
+</script>
+</body>
+</html>
